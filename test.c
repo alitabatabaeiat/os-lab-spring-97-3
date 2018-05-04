@@ -59,7 +59,7 @@ void testA() {
 }
 
 /* Test B - Process waiting when signal is called. */
-void testB(){
+void testB() {
   int pid;
   int eid;
   int ret_child, ret_parent;
@@ -85,11 +85,12 @@ void testB(){
    else {
     sleep(1);
     ret_parent = syscall(SIG, eid);
-    if(ret_parent == -1){
+    if(ret_parent == -1) {
     	printf("Error in signal. \n");
       return;
     }
     printf("Unblock %d process.\n", ret_parent);
+  }
 }
 
 /* Test C - Processes waiting when destroy is called */
@@ -99,15 +100,15 @@ void testC() {
   int ret_parent, ret_eid1, ret_eid2;
 
   eid1 = syscall(MAKE);
-  eid2 = syscall(MAKE);
   if(eid1 == -1) {
     printf("Error in creating event 1.\n");
     return;
   }
   printf("Event #%d is created.\n", eid1);
 
+  eid2 = syscall(MAKE);
   if(eid2 == -1) {
-    printf("Error in creating event 1.\n");
+    printf("Error in creating event 2.\n");
     return;
   }
   printf("Event #%d is created.\n", eid2);
@@ -120,7 +121,7 @@ void testC() {
     if(ret_eid1 == -1)
       printf("Error in wait.\n");
     else
-      printf("New process waiting on event #%d. \n", eid1);
+      printf("Process waiting on event #%d ended.\n", eid1);
     exit(0);
   } else {
     pid = fork();
@@ -131,7 +132,7 @@ void testC() {
       if(ret_eid2 == -1)
         printf("Error in wait.\n");
       else
-        printf("New process waiting on event #%d. \n", eid2);
+        printf("Process waiting on event #%d ended. \n", eid2);
       exit(0);
     } else { // main process
       sleep(1);
