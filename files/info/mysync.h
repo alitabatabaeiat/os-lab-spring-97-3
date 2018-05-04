@@ -31,6 +31,7 @@
 #include <linux/list.h>
 #include <linux/wait.h>
 #include <linux/spinlock.h>
+#include <linux/idr.h>
 
 int kernel_list_length(struct list_head *head);
 struct event *get_event(int eventID);
@@ -42,14 +43,13 @@ asmlinkage int sys_mysync_wait_event(int event_id);
 asmlinkage int sys_mysync_sig_event(int event_id);
 
 struct mysync {
-  int event_ID;
+  int event_id;
   wait_queue_head_t wait_queue;
-  struct list_head event_ID_list;
   int go_aheads;
 };
 
 extern rwlock_t mysync_lock;
-extern struct event mysync_event;
+extern struct idr id_event_map;
 extern bool mysync_initialized;
 
 #endif

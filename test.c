@@ -55,6 +55,9 @@ void testA() {
   else
     printf("Incorrect\n");
 
+  //UNCOMMENT TO SEE THE POWER OF IDR IN REUSING REMOVED EVENT IDs.
+  //syscall(DESTROY, eid);
+
   return;
 }
 
@@ -79,7 +82,7 @@ void testB() {
     if(ret_child == -1)
       printf("Error in wait.\n");
     else
-      printf("New process waiting on event #%d. \n", eid);
+      printf("Process waiting on event #%d ended. \n", eid);
     exit(0); // important!! Otherwise, the children will implement all the rest codes.
    }
    else {
@@ -89,7 +92,10 @@ void testB() {
     	printf("Error in signal. \n");
       return;
     }
-    printf("Unblock %d process.\n", ret_parent);
+    printf("Signaled successfully. %d process(es) unblocked.\n", ret_parent);
+    
+    //UNCOMMENT TO SEE THE POWER OF IDR IN REUSING REMOVED EVENT IDs.
+    //syscall(DESTROY, eid);
   }
 }
 
@@ -147,6 +153,9 @@ void testC() {
         printf("Event #%d is Destroyed.\n", eid2);
       else
         printf("Event #%d is not Destroyed.\n", eid2);
+
+      wait(NULL);
+      wait(NULL);
     }
   }
 }
