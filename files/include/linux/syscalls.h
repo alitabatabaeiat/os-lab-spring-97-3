@@ -867,7 +867,7 @@ asmlinkage long sys_kcmp(pid_t pid1, pid_t pid2, int type,
 			 unsigned long idx1, unsigned long idx2);
 asmlinkage long sys_finit_module(int fd, const char __user *uargs, int flags);
 
-asmlinkage int sys_mysync_make_event();
+asmlinkage int sys_mysync_make_event(void);
 asmlinkage int sys_mysync_destroy_event(int event_id);
 asmlinkage int sys_mysync_wait_event(int event_id);
 asmlinkage int sys_mysync_sig_event(int event_id);

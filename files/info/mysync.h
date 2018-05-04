@@ -32,7 +32,7 @@
 struct event * get_event(int eventID);
 void initiate_global(void);
 
-asmlinkage int sys_mysync_make_event();
+asmlinkage int sys_mysync_make_event(void);
 asmlinkage int sys_mysync_destroy_event(int event_id);
 asmlinkage int sys_mysync_wait_event(int event_id);
 asmlinkage int sys_mysync_sig_event(int event_id);

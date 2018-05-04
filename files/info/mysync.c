@@ -23,7 +23,7 @@ void initiate_global(void){
   event_initialized = true;
 }
 
-asmlinkage int sys_mysync_make_event() {
+asmlinkage int sys_mysync_make_event(void) {
     struct event *new_event = kmalloc(sizeof(struct event), GFP_KERNEL);
     INIT_LIST_HEAD(&(new_event->eventID_list));
 
