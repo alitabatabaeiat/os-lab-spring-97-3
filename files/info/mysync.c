@@ -1,99 +1,111 @@
 #include "mysync.h"‪
 
-struct event global_event;
-rwlock_t eventID_list_lock;
-bool event_initialized;
+struct mysync global_event;
+DEFINE_RWLOCK(mysync_lock);
+bool mysync_initialized;
 
-struct event *get_event(int eventID){
-  struct event *pos;
+int list_length(struct list_head * head){
+  int result = 0;
+  struct list_head *pos;
+  list_for_each(pos, head)
+    result++;
+  return result;
+}
 
-  list_for_each_entry(pos, &global_event.eventID_list, eventID_list){
-    if(pos->eventID == eventID){
+struct mysync *get_mysync(int event_ID){
+  struct mysync *pos;
+
+  list_for_each_entry(pos, &global_event.event_ID_list, event_ID_list){
+    if(pos->event_ID == event_ID){
       return pos;
     }
   }
-  return (struct event *) NULL;
+  return (struct mysync *) NULL;
 }
 
 void initiate_global(void){
-  eventID_list_lock = RW_LOCK_UNLOCKED;
-  INIT_LIST_HEAD(&global_event.eventID_list);
-  global_event.eventID = 0;
-  init_waitqueue_head(&global_event.waitQ);
-  event_initialized = true;
+  INIT_LIST_HEAD(&global_event.event_ID_list);
+  global_event.event_ID = 0;
+  init_waitqueue_head(&global_event.wait_queue);
+  mysync_initialized = true;
 }
 
 asmlinkage int sys_mysync_make_event(void) {
     unsigned long flags;
-    struct event *new_event;
+    struct mysync *new_mysync;
     int maxID;
 
-    new_event = kmalloc(sizeof(struct event), GFP_KERNEL);
-    INIT_LIST_HEAD(&(new_event->eventID_list));
-    write_lock_irqsave(&eventID_list_lock, flags);
-    list_add_tail(&(new_event->eventID_list), &global_event.eventID_list);
-    maxID = list_entry((new_event->eventID_list).prev, struct event, eventID_list)->eventID;
-    new_event->eventID = maxID + 1;
-    init_waitqueue_head(&(new_event->waitQ));
-    write_unlock_irqrestore(&eventID_list_lock, flags);
-    return new_event->eventID;
+    new_mysync = kmalloc(sizeof(struct mysync), GFP_KERNEL);
+    INIT_LIST_HEAD(&(new_mysync->event_ID_list));
+    
+    write_lock_irqsave(&mysync_lock, flags);
+    list_add_tail(&(new_mysync->event_ID_list), &global_event.event_ID_list);
+    maxID = list_entry((new_mysync->event_ID_list).prev, struct mysync, event_ID_list)->event_ID;
+    new_mysync->event_ID = maxID + 1;
+    init_waitqueue_head(&(new_mysync->wait_queue));
+    write_unlock_irqrestore(&mysync_lock, flags);
+    
+    return new_mysync->event_ID;
 }
 
-asmlinkage int sys_mysync_destroy_event(int eventID) {
+asmlinkage int sys_mysync_destroy_event(int event_ID) {
   unsigned long flags;
-  struct event * this_event;
+  struct mysync *event;
   int result;
 
-  if(eventID == 0)
+  if(event_ID == 0)
     return -1;
-  read_lock_irqsave(&eventID_list_lock, flags);
-  this_event = get_event(eventID);
-  read_unlock_irqrestore(&eventID_list_lock, flags);
-  if(this_event == NULL)
+
+  read_lock_irqsave(&mysync_lock, flags);
+  event = get_mysync(event_ID);
+  read_unlock_irqrestore(&mysync_lock, flags);
+
+  if(e == NULL)
     return -1;
-  result = sys_mysync_sig_event(eventID);
-  write_lock_irqsave(&eventID_list_lock, flags);
-  list_del(&(this_event->eventID_list));
-  write_unlock_irqrestore(&eventID_list_lock, flags);
-  kfree(this_event);
+  result = sys_mysync_sig_event(event_ID);
+
+  write_lock_irqsave(&mysync_lock, flags);
+  list_del(&(e->event_ID_list));
+  write_unlock_irqrestore(&mysync_lock, flags);
+
+  kfree(e);
   return result;
 }
 
-asmlinkage int sys_mysync_wait_event(int eventID) {
+asmlinkage int sys_mysync_wait_event(int event_ID) {
   unsigned long flags;
-  struct event *this_event;
+  struct mysync *e;
   int x;
 
-  if(eventID == 0)
+  if(event_ID == 0)
     return -1;
-  read_lock_irqsave(&eventID_list_lock, flags);
-  this_event = get_event(eventID);
-  x = this_event->go_aheads;
-  read_unlock_irqrestore(&eventID_list_lock, flags);
-  // The go_aheads prevents this from going to sleep
-  // if the process has just been signalled!
-  while(x == this_event->go_aheads)
-    interruptible_sleep_on(&(this_event->waitQ));
+
+  read_lock_irqsave(&mysync_lock, flags);
+  event = get_mysync(event_ID);
+  x = event->go_aheads;
+  read_unlock_irqrestore(&mysync_lock, flags);
+  
+  wait_event_interruptible(event->wait_queue, x != event->go_aheads);
   return 1;
 }
 
-asmlinkage int sys_mysync_sig_event(int eventID) {
+asmlinkage int sys_mysync_sig_event(int event_ID) {
   unsigned long flags;
-  struct event * this_event;
+  struct mysync *event;
   int result;
 
-  if(eventID == 0)
+  if(event_ID == 0)
     return -1;
-  write_lock_irqsave(&eventID_list_lock, flags);
-  this_event = get_event(eventID);
-  if(this_event == NULL)
+
+  write_lock_irqsave(&mysync_lock, flags);
+  event = get_mysync(event_ID);
+  if(event == NULL)
     return -1;
-  // Right here, the event could be deleted by another process.
-  // But not with this handy write lock!
-  this_event->go_aheads++;
-  // Same as above.
-  result = kernel_list_length(&(this_event->waitQ.task_list));
-  wake_up_interruptible(&(this_event->waitQ));
-  write_unlock_irqrestore(&eventID_list_lock, flags);
+    
+  e->go_aheads++;
+  result = list_length(&(event->wait_queue.task_list));
+  wake_up_interruptible(&(event->wait_queue));
+  write_unlock_irqrestore(&mysync_lock, flags);
+
   return result;
 }

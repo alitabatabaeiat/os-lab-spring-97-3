@@ -21,9 +21,13 @@ int main(int argc, char **argv){
   printf("Test A - No process waiting while signaled.\n");
   testA();
 
+  sleep(1);
+
   printf("\n******************************\n");
   printf("Test B - Process waiting when signal is called.\n");
   testB();
+
+  sleep(1);
 
   printf("\n******************************\n");
   printf("Test C - Processes waiting when destroy is called\n");
@@ -50,12 +54,6 @@ void testA() {
     printf("Correct\n");
   else
     printf("Incorrect\n");
-
-  ret = syscall(DESTROY, eid);
-  if (ret != -1)
-    printf("Event #%d is Destroyed.\n", eid);
-  else
-    printf("Event #%d is not Destroyed.\n", eid);
 
   return;
 }
@@ -92,13 +90,6 @@ void testB(){
       return;
     }
     printf("Unblock %d process.\n", ret_parent);
-    ret_parent = syscall(DESTROY, eid);
-    if (ret_parent != -1)
-      printf("Event #%d is Destroyed.\n", eid);
-    else
-      printf("Event #%d is not Destroyed.\n", eid);
-	}
-
 }
 
 /* Test C - Processes waiting when destroy is called */
