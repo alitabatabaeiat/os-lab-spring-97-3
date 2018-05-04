@@ -68,7 +68,7 @@ asmlinkage int sys_mysync_destroy_event(int event_ID) {
   list_del(&(event->event_ID_list));
   write_unlock_irqrestore(&mysync_lock, flags);
 
-  kfree(e);
+  kfree(event);
   return result;
 }
 
