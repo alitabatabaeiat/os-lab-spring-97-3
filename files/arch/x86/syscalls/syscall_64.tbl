@@ -364,4 +364,4 @@
 545	common  mysync_make_event			sys_mysync_make_event
 546 common  mysync_destroy_event			sys_mysync_destroy_event
 547 common  mysync_wait_event			sys_mysync_wait_event
-548 common  sig_wait_event			sys_mysync_sig_event
+548 common  mysync_sig_event			sys_mysync_sig_event
