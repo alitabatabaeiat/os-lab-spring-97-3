@@ -65,7 +65,7 @@ asmlinkage int sys_mysync_destroy_event(int event_ID) {
   result = sys_mysync_sig_event(event_ID);
 
   write_lock_irqsave(&mysync_lock, flags);
-  list_del(&(e->event_ID_list));
+  list_del(&(event->event_ID_list));
   write_unlock_irqrestore(&mysync_lock, flags);
 
   kfree(e);
@@ -102,7 +102,7 @@ asmlinkage int sys_mysync_sig_event(int event_ID) {
   if(event == NULL)
     return -1;
     
-  e->go_aheads++;
+  event->go_aheads++;
   result = list_length(&(event->wait_queue.task_list));
   wake_up_interruptible(&(event->wait_queue));
   write_unlock_irqrestore(&mysync_lock, flags);
