@@ -29,7 +29,7 @@
 #include <linux/wait.h>
 #include <linux/spinlock.h>
 
-struct event * get_event(int eventID);
+struct event *get_event(int eventID);
 void initiate_global(void);
 
 asmlinkage int sys_mysync_make_event(void);
@@ -37,16 +37,15 @@ asmlinkage int sys_mysync_destroy_event(int event_id);
 asmlinkage int sys_mysync_wait_event(int event_id);
 asmlinkage int sys_mysync_sig_event(int event_id);
 
-struct event
-{
+struct event {
   int eventID;
   struct list_head eventID_list;
   wait_queue_head_t waitQ;
   int go_aheads;
 };
 
-// extern rwlock_t eventID_list_lock;
-// extern struct event global_event;
-// extern bool event_initialized;
+extern rwlock_t eventID_list_lock;
+extern struct event global_event;
+extern bool event_initialized;
 
 #endif
