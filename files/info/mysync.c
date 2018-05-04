@@ -60,7 +60,7 @@ asmlinkage int sys_mysync_destroy_event(int event_ID) {
   event = get_mysync(event_ID);
   read_unlock_irqrestore(&mysync_lock, flags);
 
-  if(e == NULL)
+  if(event == NULL)
     return -1;
   result = sys_mysync_sig_event(event_ID);
 
@@ -74,7 +74,7 @@ asmlinkage int sys_mysync_destroy_event(int event_ID) {
 
 asmlinkage int sys_mysync_wait_event(int event_ID) {
   unsigned long flags;
-  struct mysync *e;
+  struct mysync *event;
   int x;
 
   if(event_ID == 0)
