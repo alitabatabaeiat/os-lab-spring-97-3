@@ -39,7 +39,7 @@ asmlinkage int sys_mysync_make_event(void) {
     return new_event->eventID;
 }
 
-asmlinkage int sys_mysync_destroy_event(int event_id) {
+asmlinkage int sys_mysync_destroy_event(int eventID) {
   unsigned long flags;
   struct event * this_event;
   int result;
@@ -59,7 +59,7 @@ asmlinkage int sys_mysync_destroy_event(int event_id) {
   return result;
 }
 
-asmlinkage int sys_mysync_wait_event(int event_id) {
+asmlinkage int sys_mysync_wait_event(int eventID) {
   unsigned long flags;
   struct event *this_event;
   int x;
@@ -77,7 +77,7 @@ asmlinkage int sys_mysync_wait_event(int event_id) {
   return 1;
 }
 
-asmlinkage int sys_mysync_sig_event(int event_id) {
+asmlinkage int sys_mysync_sig_event(int eventID) {
   unsigned long flags;
   struct event * this_event;
   int result;
