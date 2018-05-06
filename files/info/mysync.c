@@ -28,6 +28,7 @@ asmlinkage int sys_mysync_make_event(void) {
     ret = idr_alloc(&id_event_map, new_mysync, 1,INT_MAX,GFP_KERNEL);
     if (ret == -ENOMEM || ret == -ENOSPC) {
       write_unlock_irqrestore(&mysync_lock, flags);
+      kfree(new_mysync);
       return -1;
     }
     new_mysync->event_id=ret;
